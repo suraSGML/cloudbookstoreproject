@@ -1,0 +1,66 @@
+import { ShoppingCart, Search, BookOpen } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Link } from 'react-router-dom';
+
+interface HeaderProps {
+  cartItemCount?: number;
+}
+
+const Header = ({ cartItemCount = 0 }: HeaderProps) => {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <BookOpen className="h-8 w-8 text-primary" />
+            <span className="text-2xl font-bold font-serif">Modern BookStore</span>
+          </Link>
+
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                type="search" 
+                placeholder="Search books, authors, ISBN..." 
+                className="pl-10 bg-background"
+              />
+            </div>
+          </div>
+
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+              Browse
+            </Button>
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+              Categories
+            </Button>
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          </nav>
+        </div>
+
+        <div className="md:hidden mt-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              type="search" 
+              placeholder="Search books..." 
+              className="pl-10 bg-background"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
