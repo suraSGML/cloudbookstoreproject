@@ -1,32 +1,44 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ShoppingCart, Heart, Package, Shield, RotateCcw } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Star, ShoppingCart, Heart, ArrowLeft, Truck, Shield, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import ProductCard from '@/components/ProductCard';
 import { books } from '@/data/books';
-import { toast } from 'sonner';
+import ProductCard from '@/components/ProductCard';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 const BookDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const book = books.find((b) => b.id === id);
+  const { addToCart } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  
+  const book = books.find(b => b.id === id);
 
   if (!book) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Book not found</h1>
-        <Button onClick={() => navigate('/')}>Back to Home</Button>
+        <Link to="/">
+          <Button>Return to Home</Button>
+        </Link>
       </div>
     );
   }
 
   const relatedBooks = books
-    .filter((b) => b.genre === book.genre && b.id !== book.id)
+    .filter(b => b.genre === book.genre && b.id !== book.id)
     .slice(0, 4);
 
-  const handleAddToCart = () => {
-    toast.success(`"${book.title}" added to cart!`);
+  const inWishlist = isInWishlist(book.id);
+
+  const toggleWishlist = () => {
+    if (inWishlist) {
+      removeFromWishlist(book.id);
+    } else {
+      addToWishlist(book);
+    }
   };
 
   const mockReviews = [
@@ -53,29 +65,25 @@ const BookDetail = () => {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="text-sm text-muted-foreground mb-8">
-          <span className="hover:text-foreground cursor-pointer" onClick={() => navigate('/')}>
-            Home
-          </span>
-          {' / '}
-          <span className="hover:text-foreground cursor-pointer">{book.genre}</span>
-          {' / '}
-          <span className="text-foreground">{book.title}</span>
-        </div>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Books
+        </Link>
 
-        {/* Main Product Section */}
         <div className="grid md:grid-cols-2 gap-12 mb-16">
-          {/* Image */}
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted sticky top-24 h-fit">
-            <img
-              src={book.cover}
-              alt={book.title}
-              className="w-full h-full object-cover"
-            />
+          <div className="relative">
+            <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted sticky top-24">
+              <img
+                src={book.cover}
+                alt={book.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
 
-          {/* Details */}
           <div className="space-y-6">
             <div>
               <Badge className="mb-3">{book.genre}</Badge>
@@ -102,48 +110,58 @@ const BookDetail = () => {
               <div className="text-4xl font-bold mb-6">${book.price}</div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-success" />
-                <span className="text-sm">
-                  {book.inStock > 0 ? (
-                    <span className="text-success font-medium">In Stock ({book.inStock} available)</span>
-                  ) : (
-                    <span className="text-destructive">Out of Stock</span>
-                  )}
+            <Separator />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Availability:</span>
+                <span className={book.inStock > 0 ? 'text-green-600 font-medium' : 'text-destructive font-medium'}>
+                  {book.inStock > 0 ? `In Stock (${book.inStock} available)` : 'Out of Stock'}
                 </span>
               </div>
-
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="font-medium">Format:</span> {book.format}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Format:</span>
+                <span className="font-medium">{book.format}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="font-medium">ISBN:</span> {book.isbn}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">ISBN:</span>
+                <span className="font-medium">{book.isbn}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="font-medium">Published:</span> {book.publicationDate}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Published:</span>
+                <span className="font-medium">{book.publicationDate}</span>
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <Separator />
+
+            <div className="flex gap-3">
               <Button
                 size="lg"
-                className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
-                onClick={handleAddToCart}
+                className="flex-1 bg-accent hover:bg-accent/90"
+                onClick={() => addToCart(book)}
                 disabled={book.inStock === 0}
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
-              <Button size="lg" variant="outline">
-                <Heart className="h-5 w-5" />
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={toggleWishlist}
+                className="px-6"
+              >
+                <Heart
+                  className={`h-5 w-5 ${
+                    inWishlist ? 'fill-red-500 text-red-500' : ''
+                  }`}
+                />
               </Button>
             </div>
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t">
+            <div className="grid grid-cols-3 gap-4 pt-6">
               <div className="flex flex-col items-center text-center gap-2">
-                <Package className="h-8 w-8 text-primary" />
+                <Truck className="h-8 w-8 text-primary" />
                 <span className="text-xs text-muted-foreground">Free Shipping Over $50</span>
               </div>
               <div className="flex flex-col items-center text-center gap-2">
@@ -158,13 +176,11 @@ const BookDetail = () => {
           </div>
         </div>
 
-        {/* Description */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold mb-4">About This Book</h2>
-          <p className="text-muted-foreground leading-relaxed">{book.description}</p>
+          <p className="text-muted-foreground leading-relaxed text-lg">{book.description}</p>
         </div>
 
-        {/* Reviews */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
           <div className="space-y-4">
@@ -194,17 +210,12 @@ const BookDetail = () => {
           </div>
         </div>
 
-        {/* Related Books */}
         {relatedBooks.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedBooks.map((relatedBook) => (
-                <ProductCard
-                  key={relatedBook.id}
-                  book={relatedBook}
-                  onAddToCart={() => toast.success(`"${relatedBook.title}" added to cart!`)}
-                />
+              {relatedBooks.map(relatedBook => (
+                <ProductCard key={relatedBook.id} book={relatedBook} onAddToCart={addToCart} />
               ))}
             </div>
           </div>

@@ -1,13 +1,14 @@
-import { ShoppingCart, Search, BookOpen } from 'lucide-react';
+import { ShoppingCart, Search, BookOpen, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   cartItemCount?: number;
+  wishlistCount?: number;
 }
 
-const Header = ({ cartItemCount = 0 }: HeaderProps) => {
+const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container mx-auto px-4 py-4">
@@ -35,6 +36,16 @@ const Header = ({ cartItemCount = 0 }: HeaderProps) => {
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">
               Categories
             </Button>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />

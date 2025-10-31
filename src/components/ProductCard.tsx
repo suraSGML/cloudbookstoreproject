@@ -1,8 +1,9 @@
-import { Star, ShoppingCart } from 'lucide-react';
+import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Link } from 'react-router-dom';
 import type { Book } from '@/data/books';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface ProductCardProps {
   book: Book;
@@ -10,9 +11,21 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ book, onAddToCart }: ProductCardProps) => {
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const inWishlist = isInWishlist(book.id);
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (inWishlist) {
+      removeFromWishlist(book.id);
+    } else {
+      addToWishlist(book);
+    }
+  };
+
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-      <Link to={`/book/${book.id}`} className="block">
+      <Link to={`/book/${book.id}`} className="block relative">
         <div className="aspect-[2/3] overflow-hidden bg-muted">
           <img
             src={book.cover}
@@ -20,6 +33,16 @@ const ProductCard = ({ book, onAddToCart }: ProductCardProps) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
+        <button
+          onClick={handleWishlistToggle}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+        >
+          <Heart
+            className={`h-5 w-5 ${
+              inWishlist ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
+            }`}
+          />
+        </button>
       </Link>
       
       <div className="p-4 space-y-3">

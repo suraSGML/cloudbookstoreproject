@@ -1,20 +1,54 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowRight, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
+import FilterSort, { type FilterOptions } from '@/components/FilterSort';
 import { books } from '@/data/books';
 import type { Book } from '@/data/books';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
 
 const Home = () => {
-  const [cart, setCart] = useState<Book[]>([]);
-  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [filters, setFilters] = useState<FilterOptions>({
+    genre: 'all',
+    minPrice: 0,
+    maxPrice: 50,
+    minRating: 0,
+    sortBy: 'featured',
+  });
 
-  const handleAddToCart = (book: Book) => {
-    setCart([...cart, book]);
-    toast.success(`"${book.title}" added to cart!`);
-  };
+  const genres = useMemo(() => {
+    const uniqueGenres = new Set(books.map(book => book.genre));
+    return Array.from(uniqueGenres).sort();
+  }, []);
+
+  const filteredAndSortedBooks = useMemo(() => {
+    let filtered = books.filter(book => {
+      if (filters.genre !== 'all' && book.genre !== filters.genre) return false;
+      if (book.price < filters.minPrice || book.price > filters.maxPrice) return false;
+      if (book.rating < filters.minRating) return false;
+      return true;
+    });
+
+    switch (filters.sortBy) {
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'title':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      default:
+        break;
+    }
+
+    return filtered;
+  }, [filters]);
 
   const featuredBooks = books.slice(0, 4);
   const bestSellers = books.filter(book => book.rating >= 4.6).slice(0, 4);
@@ -81,8 +115,54 @@ const Home = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredBooks.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={handleAddToCart} />
+            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
           ))}
+        </div>
+      </section>
+
+      {/* All Books with Filters */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">All Books</h2>
+          <p className="text-muted-foreground">Browse our complete collection</p>
+        </div>
+
+        <div className="grid lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <FilterSort
+              filters={filters}
+              onFilterChange={setFilters}
+              genres={genres}
+            />
+          </div>
+
+          <div className="lg:col-span-3">
+            {filteredAndSortedBooks.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-xl text-muted-foreground mb-4">No books found matching your filters</p>
+                <Button onClick={() => setFilters({
+                  genre: 'all',
+                  minPrice: 0,
+                  maxPrice: 50,
+                  minRating: 0,
+                  sortBy: 'featured',
+                })}>
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Showing {filteredAndSortedBooks.length} {filteredAndSortedBooks.length === 1 ? 'book' : 'books'}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredAndSortedBooks.map((book) => (
+                    <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </section>
 
@@ -105,31 +185,17 @@ const Home = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {bestSellers.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={handleAddToCart} />
+            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
           ))}
         </div>
       </section>
 
       {/* New Releases */}
       <section className="container mx-auto px-4 py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-5 w-5 text-accent" />
-              <span className="text-sm font-medium text-accent uppercase tracking-wider">Just In</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold">New Releases</h2>
-            <p className="text-muted-foreground mt-2">Fresh arrivals you won't want to miss</p>
-          </div>
-          <Button variant="ghost">
-            View All
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-
+...
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {newReleases.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={handleAddToCart} />
+            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
           ))}
         </div>
       </section>
