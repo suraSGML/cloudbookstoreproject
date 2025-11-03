@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +14,7 @@ import { toast } from 'sonner';
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
+  const { session } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Shipping
@@ -63,15 +66,70 @@ const Checkout = () => {
     }
   };
 
-  const handlePlaceOrder = () => {
-    const orderNumber = `MBS-${Date.now().toString().slice(-6)}`;
-    clearCart();
-    toast.success('Order placed successfully!');
-    navigate(`/order-confirmation/${orderNumber}`);
+  const handlePlaceOrder = async () => {
+    if (!session?.user) {
+      toast.error('Please sign in to place an order');
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      const orderNumber = `MBS-${Date.now().toString().slice(-6)}`;
+
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: session.user.id,
+          order_number: orderNumber,
+          total_amount: total,
+          shipping_address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderItems = cart.map(item => ({
+        order_id: order.id,
+        book_id: parseInt(item.id),
+        book_title: item.title,
+        book_author: item.author,
+        book_price: item.price,
+        book_image: item.cover,
+        quantity: item.quantity,
+        subtotal: item.price * item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      clearCart();
+      toast.success('Order placed successfully!');
+      navigate(`/order-confirmation/${orderNumber}`);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
+    }
   };
 
-  if (cart.length === 0) {
-    navigate('/cart');
+  useEffect(() => {
+    if (cart.length === 0) {
+      navigate('/cart');
+    }
+  }, [cart, navigate]);
+
+  useEffect(() => {
+    if (!session) {
+      toast.error('Please sign in to checkout');
+      navigate('/auth');
+    }
+  }, [session, navigate]);
+
+  if (cart.length === 0 || !session) {
     return null;
   }
 

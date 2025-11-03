@@ -6,6 +6,7 @@ import FilterSort, { type FilterOptions } from '@/components/FilterSort';
 import { books } from '@/data/books';
 import type { Book } from '@/data/books';
 import { useCart } from '@/contexts/CartContext';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const { addToCart } = useCart();
@@ -209,12 +210,14 @@ const Home = () => {
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
             Get exclusive access to early releases, author interviews, and personalized recommendations.
           </p>
-          <Button 
-            size="lg" 
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
-          >
-            Sign Up Free
-          </Button>
+          <Link to="/auth">
+            <Button 
+              size="lg" 
+              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
+              Sign Up Free
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

@@ -1,7 +1,9 @@
-import { ShoppingCart, Search, BookOpen, Heart } from 'lucide-react';
+import { ShoppingCart, Search, BookOpen, Heart, User, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 interface HeaderProps {
   cartItemCount?: number;
@@ -9,6 +11,8 @@ interface HeaderProps {
 }
 
 const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container mx-auto px-4 py-4">
@@ -30,12 +34,11 @@ const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
           </div>
 
           <nav className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="hidden md:inline-flex">
-              Browse
-            </Button>
-            <Button variant="ghost" size="sm" className="hidden md:inline-flex">
-              Categories
-            </Button>
+            <Link to="/order-history">
+              <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+                Orders
+              </Button>
+            </Link>
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative">
                 <Heart className="h-5 w-5" />
@@ -56,6 +59,27 @@ const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
                 )}
               </Button>
             </Link>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
 
