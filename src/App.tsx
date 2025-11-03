@@ -15,6 +15,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import OrderHistory from "./pages/OrderHistory";
 import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -38,6 +39,7 @@ const AppContent = () => {
           <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

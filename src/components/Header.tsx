@@ -1,9 +1,10 @@
-import { ShoppingCart, Search, BookOpen, Heart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Search, BookOpen, Heart, User, LogOut, Shield } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useUserRole } from '@/hooks/useUserRole';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from './ui/dropdown-menu';
 
 interface HeaderProps {
   cartItemCount?: number;
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -67,6 +69,17 @@ const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
