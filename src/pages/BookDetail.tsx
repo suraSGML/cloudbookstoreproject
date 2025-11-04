@@ -1,20 +1,95 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Star, ShoppingCart, Heart, ArrowLeft, Truck, Shield, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { books } from '@/data/books';
+import { supabase } from '@/integrations/supabase/client';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { Loader2 } from 'lucide-react';
+
+interface Book {
+  id: string;
+  title: string;
+  author: string;
+  price: number;
+  rating: number;
+  format: string;
+  genre: string;
+  cover: string | null;
+  description: string | null;
+  isbn: string | null;
+  publication_date: string | null;
+  publicationDate?: string; // For compatibility
+  in_stock: boolean;
+  inStock?: number;
+}
 
 const BookDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   
-  const book = books.find(b => b.id === id);
+  const [book, setBook] = useState<Book | null>(null);
+  const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      fetchBook(id);
+    }
+  }, [id]);
+
+  const fetchBook = async (bookId: string) => {
+    const { data: bookData, error: bookError } = await supabase
+      .from('books')
+      .select('*')
+      .eq('id', bookId)
+      .single();
+
+    if (bookError || !bookData) {
+      setLoading(false);
+      return;
+    }
+
+    const bookWithInStock = {
+      ...bookData,
+      inStock: bookData.in_stock ? 10 : 0,
+      publicationDate: bookData.publication_date || undefined
+    };
+
+    setBook(bookWithInStock);
+
+    // Fetch related books
+    const { data: relatedData } = await supabase
+      .from('books')
+      .select('*')
+      .eq('genre', bookData.genre)
+      .neq('id', bookId)
+      .limit(4);
+
+    if (relatedData) {
+      const transformedRelated = relatedData.map(b => ({
+        ...b,
+        inStock: b.in_stock ? 10 : 0,
+        publicationDate: b.publication_date || undefined
+      }));
+      setRelatedBooks(transformedRelated);
+    }
+
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!book) {
     return (
@@ -27,17 +102,13 @@ const BookDetail = () => {
     );
   }
 
-  const relatedBooks = books
-    .filter(b => b.genre === book.genre && b.id !== book.id)
-    .slice(0, 4);
-
   const inWishlist = isInWishlist(book.id);
 
   const toggleWishlist = () => {
     if (inWishlist) {
       removeFromWishlist(book.id);
     } else {
-      addToWishlist(book);
+      addToWishlist(book as any);
     }
   };
 
@@ -125,11 +196,11 @@ const BookDetail = () => {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">ISBN:</span>
-                <span className="font-medium">{book.isbn}</span>
+                <span className="font-medium">{book.isbn || 'N/A'}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Published:</span>
-                <span className="font-medium">{book.publicationDate}</span>
+                <span className="font-medium">{book.publication_date || 'N/A'}</span>
               </div>
             </div>
 
@@ -139,7 +210,7 @@ const BookDetail = () => {
               <Button
                 size="lg"
                 className="flex-1 bg-accent hover:bg-accent/90"
-                onClick={() => addToCart(book)}
+                onClick={() => addToCart(book as any)}
                 disabled={book.inStock === 0}
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
@@ -215,7 +286,7 @@ const BookDetail = () => {
             <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedBooks.map(relatedBook => (
-                <ProductCard key={relatedBook.id} book={relatedBook} onAddToCart={addToCart} />
+                <ProductCard key={relatedBook.id} book={relatedBook as any} onAddToCart={addToCart} />
               ))}
             </div>
           </div>

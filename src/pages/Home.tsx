@@ -1,15 +1,34 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ArrowRight, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import FilterSort, { type FilterOptions } from '@/components/FilterSort';
-import { books } from '@/data/books';
-import type { Book } from '@/data/books';
+import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+
+interface Book {
+  id: string;
+  title: string;
+  author: string;
+  price: number;
+  rating: number;
+  format: string;
+  genre: string;
+  cover: string | null;
+  description: string | null;
+  isbn: string | null;
+  publication_date: string | null;
+  publicationDate?: string; // For compatibility
+  in_stock: boolean;
+  inStock?: number; // For compatibility with ProductCard
+}
 
 const Home = () => {
   const { addToCart } = useCart();
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterOptions>({
     genre: 'all',
     minPrice: 0,
@@ -17,6 +36,33 @@ const Home = () => {
     minRating: 0,
     sortBy: 'featured',
   });
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = async () => {
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .eq('in_stock', true);
+
+    if (error) {
+      console.error('Error fetching books:', error);
+      setLoading(false);
+      return;
+    }
+
+    // Transform data to include inStock for compatibility
+    const transformedBooks = data.map(book => ({
+      ...book,
+      inStock: book.in_stock ? 10 : 0,
+      publicationDate: book.publication_date || undefined
+    }));
+
+    setBooks(transformedBooks);
+    setLoading(false);
+  };
 
   const genres = useMemo(() => {
     const uniqueGenres = new Set(books.map(book => book.genre));
@@ -51,9 +97,17 @@ const Home = () => {
     return filtered;
   }, [filters]);
 
-  const featuredBooks = books.slice(0, 4);
-  const bestSellers = books.filter(book => book.rating >= 4.6).slice(0, 4);
-  const newReleases = books.slice(4, 8);
+  const featuredBooks = useMemo(() => books.slice(0, 4), [books]);
+  const bestSellers = useMemo(() => books.filter(book => book.rating >= 4.6).slice(0, 4), [books]);
+  const newReleases = useMemo(() => books.slice(4, 8), [books]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -116,7 +170,7 @@ const Home = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredBooks.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
+            <ProductCard key={book.id} book={book as any} onAddToCart={addToCart} />
           ))}
         </div>
       </section>
@@ -158,7 +212,7 @@ const Home = () => {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredAndSortedBooks.map((book) => (
-                    <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
+                    <ProductCard key={book.id} book={book as any} onAddToCart={addToCart} />
                   ))}
                 </div>
               </>
@@ -186,7 +240,7 @@ const Home = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {bestSellers.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
+            <ProductCard key={book.id} book={book as any} onAddToCart={addToCart} />
           ))}
         </div>
       </section>
@@ -196,7 +250,7 @@ const Home = () => {
 ...
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {newReleases.map((book) => (
-            <ProductCard key={book.id} book={book} onAddToCart={addToCart} />
+            <ProductCard key={book.id} book={book as any} onAddToCart={addToCart} />
           ))}
         </div>
       </section>
