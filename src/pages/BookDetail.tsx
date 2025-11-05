@@ -2,7 +2,6 @@ import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Star, ShoppingCart, Heart, ArrowLeft, Truck, Shield, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,8 @@ import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Loader2 } from 'lucide-react';
+import BookReviews from '@/components/BookReviews';
+import BookPreview from '@/components/BookPreview';
 
 interface Book {
   id: string;
@@ -23,9 +24,12 @@ interface Book {
   description: string | null;
   isbn: string | null;
   publication_date: string | null;
-  publicationDate?: string; // For compatibility
+  publicationDate?: string;
   in_stock: boolean;
   inStock?: number;
+  preview_url?: string | null;
+  download_url?: string | null;
+  pages_preview?: number;
 }
 
 const BookDetail = () => {
@@ -112,27 +116,6 @@ const BookDetail = () => {
     }
   };
 
-  const mockReviews = [
-    {
-      author: 'Sarah Johnson',
-      rating: 5,
-      date: 'January 15, 2025',
-      text: 'Absolutely captivating from start to finish. Highly recommend!',
-    },
-    {
-      author: 'Michael Chen',
-      rating: 4,
-      date: 'January 10, 2025',
-      text: 'Great read, though the pacing slowed in the middle. Still worth it!',
-    },
-    {
-      author: 'Emily Rodriguez',
-      rating: 5,
-      date: 'January 5, 2025',
-      text: "One of the best books I've read this year. The characters felt so real.",
-    },
-  ];
-
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -175,7 +158,6 @@ const BookDetail = () => {
                   ))}
                 </div>
                 <span className="text-lg font-semibold">{book.rating}</span>
-                <span className="text-muted-foreground">({mockReviews.length} reviews)</span>
               </div>
 
               <div className="text-4xl font-bold mb-6">${book.price}</div>
@@ -230,6 +212,16 @@ const BookDetail = () => {
               </Button>
             </div>
 
+            <Separator />
+
+            <BookPreview
+              bookId={book.id}
+              bookTitle={book.title}
+              previewUrl={book.preview_url}
+              downloadUrl={book.download_url}
+              pagesPreview={book.pages_preview}
+            />
+
             <div className="grid grid-cols-3 gap-4 pt-6">
               <div className="flex flex-col items-center text-center gap-2">
                 <Truck className="h-8 w-8 text-primary" />
@@ -253,32 +245,7 @@ const BookDetail = () => {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-          <div className="space-y-4">
-            {mockReviews.map((review, index) => (
-              <Card key={index} className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-semibold">{review.author}</p>
-                    <p className="text-sm text-muted-foreground">{review.date}</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < review.rating
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'text-muted-foreground/30'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground">{review.text}</p>
-              </Card>
-            ))}
-          </div>
+          <BookReviews bookId={book.id} />
         </div>
 
         {relatedBooks.length > 0 && (

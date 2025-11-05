@@ -5,7 +5,7 @@ import ProductCard from '@/components/ProductCard';
 import FilterSort, { type FilterOptions } from '@/components/FilterSort';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 interface Book {
@@ -27,6 +27,7 @@ interface Book {
 
 const Home = () => {
   const { addToCart } = useCart();
+  const [searchParams] = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -36,6 +37,8 @@ const Home = () => {
     minRating: 0,
     sortBy: 'featured',
   });
+  
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     fetchBooks();
@@ -71,12 +74,32 @@ const Home = () => {
 
   const filteredAndSortedBooks = useMemo(() => {
     let filtered = books.filter(book => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          book.title.toLowerCase().includes(query) ||
+          book.author.toLowerCase().includes(query) ||
+          book.genre.toLowerCase().includes(query) ||
+          (book.isbn && book.isbn.toLowerCase().includes(query)) ||
+          (book.description && book.description.toLowerCase().includes(query));
+        
+        if (!matchesSearch) return false;
+      }
+      
+      // Genre filter
       if (filters.genre !== 'all' && book.genre !== filters.genre) return false;
+      
+      // Price filter
       if (book.price < filters.minPrice || book.price > filters.maxPrice) return false;
+      
+      // Rating filter
       if (book.rating < filters.minRating) return false;
+      
       return true;
     });
 
+    // Sorting
     switch (filters.sortBy) {
       case 'price-asc':
         filtered.sort((a, b) => a.price - b.price);
@@ -95,7 +118,7 @@ const Home = () => {
     }
 
     return filtered;
-  }, [filters]);
+  }, [books, filters, searchQuery]);
 
   const featuredBooks = useMemo(() => books.slice(0, 4), [books]);
   const bestSellers = useMemo(() => books.filter(book => book.rating >= 4.6).slice(0, 4), [books]);

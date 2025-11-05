@@ -1,10 +1,11 @@
 import { ShoppingCart, Search, BookOpen, Heart, User, LogOut, Shield } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from './ui/dropdown-menu';
+import { useState } from 'react';
 
 interface HeaderProps {
   cartItemCount?: number;
@@ -14,6 +15,18 @@ interface HeaderProps {
 const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -24,16 +37,18 @@ const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
             <span className="text-2xl font-bold font-serif">Modern BookStore</span>
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 type="search" 
                 placeholder="Search books, authors, ISBN..." 
                 className="pl-10 bg-background"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-          </div>
+          </form>
 
           <nav className="flex items-center gap-2">
             <Link to="/order-history">
@@ -96,16 +111,18 @@ const Header = ({ cartItemCount = 0, wishlistCount = 0 }: HeaderProps) => {
           </nav>
         </div>
 
-        <div className="md:hidden mt-3">
+        <form onSubmit={handleSearch} className="md:hidden mt-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               type="search" 
               placeholder="Search books..." 
               className="pl-10 bg-background"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
+        </form>
       </div>
     </header>
   );
