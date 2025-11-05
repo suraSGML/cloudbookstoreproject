@@ -218,6 +218,36 @@ export type Database = {
           },
         ]
       }
+      shared_wishlists: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          share_code: string
+          user_id: string
+          view_count: number | null
+          wishlist_data: Json
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          share_code: string
+          user_id: string
+          view_count?: number | null
+          wishlist_data: Json
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          share_code?: string
+          user_id?: string
+          view_count?: number | null
+          wishlist_data?: Json
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -244,6 +274,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_share_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
