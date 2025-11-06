@@ -70,7 +70,7 @@ const Home = () => {
   const genres = useMemo(() => {
     const uniqueGenres = new Set(books.map(book => book.genre));
     return Array.from(uniqueGenres).sort();
-  }, []);
+  }, [books]);
 
   const filteredAndSortedBooks = useMemo(() => {
     let filtered = books.filter(book => {

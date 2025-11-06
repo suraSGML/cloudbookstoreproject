@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import BookDetail from "./pages/BookDetail";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
+import SharedWishlist from "./pages/SharedWishlist";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import OrderHistory from "./pages/OrderHistory";
@@ -35,6 +36,7 @@ const AppContent = () => {
           <Route path="/book/:id" element={<BookDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/shared-wishlist/:shareCode" element={<SharedWishlist />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
           <Route path="/order-history" element={<OrderHistory />} />
