@@ -1,6 +1,7 @@
 import { BookOpen, Mail, MapPin, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -34,20 +35,20 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Shop</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">New Releases</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Best Sellers</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Staff Picks</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Browse All</a></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">New Releases</Link></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">Best Sellers</Link></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">Staff Picks</Link></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">Browse All</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Returns</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">FAQ</a></li>
+              <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact Us</Link></li>
+              <li><Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Info</Link></li>
+              <li><Link to="/returns" className="hover:text-foreground transition-colors">Returns</Link></li>
+              <li><Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
             </ul>
           </div>
 

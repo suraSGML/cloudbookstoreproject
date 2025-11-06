@@ -17,6 +17,10 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import OrderHistory from "./pages/OrderHistory";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
+import ContactUs from "./pages/ContactUs";
+import ShippingInfo from "./pages/ShippingInfo";
+import Returns from "./pages/Returns";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -42,6 +46,10 @@ const AppContent = () => {
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/shipping" element={<ShippingInfo />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
