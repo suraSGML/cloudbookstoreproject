@@ -41,7 +41,7 @@ const BookReviews = ({ bookId }: BookReviewsProps) => {
   const fetchReviews = async () => {
     const { data, error } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*, profiles:user_id(full_name, email)')
       .eq('book_id', bookId)
       .order('created_at', { ascending: false });
 

@@ -255,7 +255,13 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold">Best Sellers</h2>
             <p className="text-muted-foreground mt-2">Most popular books this month</p>
           </div>
-          <Button variant="ghost">
+          <Button 
+            variant="ghost"
+            onClick={() => {
+              setViewFilter('bestseller');
+              window.scrollTo({ top: 600, behavior: 'smooth' });
+            }}
+          >
             View All
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -278,25 +284,27 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-12 text-center text-primary-foreground">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Join Our Book Community
-          </h2>
-          <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Get exclusive access to early releases, author interviews, and personalized recommendations.
-          </p>
-          <Link to="/auth">
-            <Button 
-              size="lg" 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
-            >
-              Sign Up Free
-            </Button>
-          </Link>
-        </div>
-      </section>
+      {/* CTA Section - Only show when not logged in */}
+      {!user && (
+        <section className="container mx-auto px-4 py-16">
+          <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-12 text-center text-primary-foreground">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Join Our Book Community
+            </h2>
+            <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
+              Get exclusive access to early releases, author interviews, and personalized recommendations.
+            </p>
+            <Link to="/auth">
+              <Button 
+                size="lg" 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
+                Sign Up Free
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
