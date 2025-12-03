@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowRight, Sparkles, TrendingUp, Award } from 'lucide-react';
+import { ArrowRight, Sparkles, TrendingUp, Award, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import FilterSort, { type FilterOptions } from '@/components/FilterSort';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 
 interface Book {
   id: string;
@@ -27,6 +27,7 @@ interface Book {
 
 const Home = () => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -258,7 +259,7 @@ const Home = () => {
           <Button 
             variant="ghost"
             onClick={() => {
-              setViewFilter('bestseller');
+              setFilters(prev => ({ ...prev, minRating: 4.6 }));
               window.scrollTo({ top: 600, behavior: 'smooth' });
             }}
           >
