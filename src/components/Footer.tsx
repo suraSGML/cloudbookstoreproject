@@ -21,9 +21,9 @@ const Footer = () => {
     setSubscribing(true);
     
     try {
-      const { error } = await supabase
-        .from('newsletter_subscriptions')
-        .insert([{ email }]);
+      const { error } = await (supabase
+        .from('newsletter_subscriptions' as any)
+        .insert([{ email }]) as any);
 
       if (error) {
         if (error.code === '23505') {
