@@ -28,11 +28,19 @@ jobs:
         run: npm install
 
       - name: Build project with correct base
-        # Base must match repo name exactly
+        # REPLACE REPO_NAME with your repo name
         run: npx vite build --base /cloudbookstoreproject/
 
       - name: Add 404 fallback for routing
+        # Ensures refresh / unknown routes work
         run: cp dist/index.html dist/404.html
+
+      - name: Inject hash fallback for BrowserRouter
+        # This creates a tiny JS snippet in index.html for project repo subpaths
+        run |
+          if grep -q "cloudbookstoreproject" <<< "/cloudbookstoreproject/"; then
+            sed -i '1i\<script>if(location.pathname==="/cloudbookstoreproject/"){location.replace("/cloudbookstoreproject/#/");}</script>' dist/index.html
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
