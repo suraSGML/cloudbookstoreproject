@@ -28,7 +28,8 @@ jobs:
         run: npm install
 
       - name: Build project with correct base
-        run: npx vite build --base /  # important for paths
+        # FIX: base path points to repo name
+        run: npx vite build --base /cloudbookstoreproject/
 
       - name: Add 404 fallback for routing
         run: cp dist/index.html dist/404.html
