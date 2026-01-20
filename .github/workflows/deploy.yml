@@ -28,16 +28,11 @@ jobs:
         run: npm install
 
       - name: Build project with correct base
-        # REPLACE REPO_NAME with your repo name
+        # Base must match repo name exactly
         run: npx vite build --base /cloudbookstoreproject/
 
-      - name: Add 404.html fallback for routing
-        # Ensures refresh and unknown routes load index
+      - name: Add 404 fallback for routing
         run: cp dist/index.html dist/404.html
-
-      - name: Add hash redirect for GitHub Pages
-        # This creates a tiny index.html that redirects to #/
-        run: echo '<script>window.location.replace(window.location.pathname + "#/");</script>' > dist/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
