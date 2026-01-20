@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -28,10 +28,10 @@ jobs:
         run: npm install
 
       - name: Build project with correct base
-        # Use the repo name as base
+        # REPLACE REPO_NAME with your repo name
         run: npx vite build --base /cloudbookstoreproject/
 
-      - name: Add 404.html fallback for routing
+      - name: Add 404 fallback for routing
         run: cp dist/index.html dist/404.html
 
       - name: Upload Pages artifact
